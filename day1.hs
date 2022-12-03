@@ -2,11 +2,9 @@ import Control.Monad (guard)
 import Data.Functor ((<&>))
 import Data.List (foldl', sort)
 import System.Environment (getArgs)
+import Utils
 
 data Elf a = Elf [a] deriving (Eq, Show)
-
-nonNull :: [a] -> Bool
-nonNull = not . null
 
 toElf :: [a] -> (a -> b) -> Elf b
 toElf xs f = Elf (f <$> xs)
@@ -26,9 +24,6 @@ maxN n = take n . reverse . sort
 
 main :: IO ()
 main = do
-  args <- getArgs
-  guard (nonNull args)
-  let fileName = head args
-  contents <- readFile fileName <&> (groupListOfStrings . lines)
+  contents <- readFileFromArg id <&> groupListOfStrings
   let elves = fmap (\xs -> (toElf xs read :: Elf Integer)) contents
   print ((sum . maxN 3) (elfTotalCalories <$> elves))
